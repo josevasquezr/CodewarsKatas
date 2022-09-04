@@ -11,31 +11,32 @@ namespace KatasTrainings
         public int Score(int[] dice)
         {
             int score = 0;
-            List<int> diceCopy = dice.ToList();
-            List<int> threeValueDices = new List<int>();
 
-            foreach (int numr in dice)
+            var numberCountGroup = dice.GroupBy(n => n)
+                                        .Select(g => new { num = g.Key, count = g.Count() })
+                                        .ToList();
+
+            foreach (var tup in numberCountGroup)
             {
-                int count = dice.Where(n => n == numr).Select(n => n).Count();
-
-                if (count >= 3 && !threeValueDices.Contains(numr))
+                switch (tup.count)
                 {
-                    for(int i = 0; i < 3; i++)
-                    {
-                        diceCopy.Remove(numr);
-                    }
-                    threeValueDices.Add(numr);
+                    case 1: case 2:
+                        score += GetOneValue().GetValueOrDefault(tup.num, 0) * tup.count;
+                        break;
+                    case 3:
+                        score += GetThreeValue().GetValueOrDefault(tup.num, 0);
+                        break;
+                    case 4:
+                        score += GetThreeValue().GetValueOrDefault(tup.num, 0);
+                        score += GetOneValue().GetValueOrDefault(tup.num, 0);
+                        break;
+                    case 5:
+                        score += GetThreeValue().GetValueOrDefault(tup.num, 0);
+                        score += GetOneValue().GetValueOrDefault(tup.num, 0) * 2;
+                        break;
+                    default:
+                        break;
                 }
-            }
-
-            foreach(int threeVal in threeValueDices)
-            {
-                score += GetThreeValue().GetValueOrDefault(threeVal);
-            }
-
-            foreach (int oneVal in diceCopy)
-            {
-                score += GetOneValue().GetValueOrDefault(oneVal);
             }
 
             return score;
